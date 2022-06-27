@@ -124,10 +124,7 @@ This topic contains the following sections:
          options mautosource insert = (sasautos = ( FuncMcro ProcMcro )) 
 
 #### Examples
-```
-[examples of invoking the macros](https://gitlab.sas.com/nopowe/ci360_sas_tools/-/blob/master/examples)
-
-```
+Find a list of code samples invoking the macros in the [examples directory](/examples)
 
 ## Contributing
 
