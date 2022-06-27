@@ -1,0 +1,28 @@
+{
+    "name": "TestData_z13",
+    "description": "Yet another data uploaded",
+    "type": "customer",
+    "dataItems": [
+        {
+            "name": "customer_id",
+            "label": "Customer ID z13",
+            "description": "Identity",
+            "type": "STRING",
+            "tags": ["DEMOGRAPHICS"],
+            "excludeFromAnalytics": true,
+            "identityType": "customer_id",
+            "identity": true,
+            "segmentation": false,
+            "key": true
+        },
+        {
+            "name": "NeverTargetz13",
+            "label": "Targets to avoid also z13",
+            "description": "k means Segments",
+            "type": "STRING",
+            "tags": ["DEMOGRAPHICS"],
+            "identity": false,
+            "segmentation": true
+        }
+    ]
+}
