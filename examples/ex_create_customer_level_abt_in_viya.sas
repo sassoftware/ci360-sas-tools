@@ -14,7 +14,7 @@
 
 %let discover_path = /mydata/discover ;
 %let engage_path   = /mydata/engage ;
-
+   
 cas mycas ;
 
 caslib disc datasource=(srctype=PATH) path="&discover_path." ;
@@ -211,6 +211,15 @@ run ;
                                GroupVar       =,
                                outds          =disc.page_details_id,
                                outdsOpts      =%str(compress=YES)) ;
+
+data disc.page_details_id ;
+  set disc.page_details_id ;
+  avgSecPerPage = sum(0,sec_on_page) / NumPages; 
+  avgActiveSecPerPage = sum(0,act_sec_on_page) / NumPages;
+  
+  label avgSecPerPage                    = "Avg Seconds per Page"
+        avgActiveSecPerPage              = "Avg Active Seconds per Page" ;
+run ;
 
 ** table no longer needed so remove from memory **;                        
 proc casutil incaslib="disc" outcaslib="disc";
