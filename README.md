@@ -24,14 +24,9 @@ This repository is a collection of SAS macros designed to exercise Customer Inte
       - %update_identities()
       
       Create Customer (identity_id) level summaries for ABT:
-      - %make_custom_event_identity_lvl()
-      - %make_document_identity_lvl()
-      - %make_page_identity_lvl()
-      - %make_promotion_identity_lvl()
-      - %make_search_identity_lvl()
+      - %make_disc_detail_identity_lvl()      
       - %make_session_identity_lvl()
-      - %make_url_vars()
-      - %make_visit_identity_lvl()
+      - %make_url_vars()      
 
       CI360 HUB / External Event Related:
       - %batch_load_external_ci360_events()
