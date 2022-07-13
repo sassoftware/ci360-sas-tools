@@ -251,6 +251,14 @@ data disc.visit_details ;
   ;
   by active_identity_id visit_dttm ;
   if inmain and NOT inconv ;  
+  
+  ** Example of using time based buckets for group variable **;
+  ** Could group into week starting sunday buckets  **; 
+  week_beg = intnx('week', datepart(visit_dttm), 0, 'beginning');
+  ** Could group into bi-weekly starting sunday buckets  **;
+  biweek_beg = intnx('week2', datepart(visit_dttm), 0, 'beginning');
+  group_var = put(biweek_beg,date8.) ;
+  format week_beg biweek_beg date8. ;
 run ;
                          
 %Make_Disc_Detail_Identity_Lvl(inds           =disc.visit_details,
@@ -260,10 +268,10 @@ run ;
                                vars2agg       =,
                                NewAggNames    =,
                                NewLabels      =Num Visits,
-                               GroupPrefixList=,
+                               GroupPrefixList=NumVisits,
                                start_dttm_var =ABT_start_dttm,
                                end_dttm_var   =ABT_end_dttm,
-                               GroupVar       =,
+                               GroupVar       =group_var,
                                outds          =disc.visit_details_id,
                                outdsOpts      =%str(compress=YES)) ;                         
 
