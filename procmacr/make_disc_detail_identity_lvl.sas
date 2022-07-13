@@ -77,7 +77,7 @@
                                      outdsOpts      =%str(compress=YES)) ;
 
   %local InDsLib InDsName inViya libEngine whereStmt NewVars NumNewVars i var avglist minlist maxlist Groups NumGroups pfix
-         j group baselabel ;
+         j group baselabel session_var ;
         
   %let InDsLib  = %scan(&InDs.,1,%str(.)) ;
   %let InDsName = %scan(&InDs.,2,%str(.)) ;
@@ -121,6 +121,10 @@
     %let maxlist = &maxlist. max_&var._per_sesn ;
   %end ;
   
+  ** Determine session variable if one exists in the input data **;
+  %let session_var = %match(%varlist(&inds.),session_id) ;
+  %if not %length(&session_var.) %then %let session_var = %match(%varlist(&inds.),session_id_hex) ;
+  
   %if %length(&GroupVar.) %then %do ;
     %if (&inViya. = 0) %then %do ;
       proc sql noprint ;
@@ -146,26 +150,39 @@
     ** Sum to identity and session **;
     proc means data=&inds. (where=(&WhereStmt.)) nway noprint ;
       by &identityVar. ;
-      class session_id ;
+      %if %length(&session_var.) %then %do ;
+        class &session_var. ;
+      %end ;
       var load_dttm &vars2agg. ;
-      output out=&InDsLib.._session_ (drop=_type_ _freq_) N(load_dttm)=&ObsCountVar. sum(&vars2agg.)=&NewAggNames. ;
+      output out=&InDsLib.._session_ (drop=_type_ _freq_) N(load_dttm)=&ObsCountVar. 
+        %if %length(&vars2agg.) %then %do ;
+          sum(&vars2agg.)=&NewAggNames. 
+        %end ;
+        ;
     run ;
   
-    ** Sum across sessions to identity **;
-    proc means data=&InDsLib.._session_ nway noprint ;
-      by &identityVar. ;
-      var &ObsCountVar. &NewAggNames. ;
-      output out=&InDsLib.._session_sum_ (compress=YES drop=_type_ _freq_)         
-        sum(&ObsCountVar. &NewAggNames.)  =
-        mean(&ObsCountVar. &NewAggNames.) =&avglist. 
-        min(&ObsCountVar. &NewAggNames.)  =&minlist. 
-        max(&ObsCountVar. &NewAggNames.)  =&maxlist. ;
-    run ;
+    %if %length(&session_var.) %then %do ;
+      ** Sum across sessions to identity **;
+      proc means data=&InDsLib.._session_ nway noprint ;
+        by &identityVar. ;
+        var &ObsCountVar. &NewAggNames. ;
+        output out=&InDsLib.._session_sum_ (compress=YES drop=_type_ _freq_)         
+          sum(&ObsCountVar. &NewAggNames.)  =
+          mean(&ObsCountVar. &NewAggNames.) =&avglist. 
+          min(&ObsCountVar. &NewAggNames.)  =&minlist. 
+          max(&ObsCountVar. &NewAggNames.)  =&maxlist. ;
+      run ;
+    %end ;
+    %else %do ;
+      proc datasets library=&InDsLib. nolist ;
+        change _session_=_session_sum_ ;
+      quit ;
+    %end ;
   %end ;
   %else %do ;
   
     %CAS_Proc_Means(inds           =&inds.,
-                    GroupVars      =&identityVar. session_id,
+                    GroupVars      =&identityVar. &session_var.,
                     InDsWhere      =%str(&WhereStmt.),
                     Vars           =load_dttm &vars2agg.,
                     AggTypeList    =n sum,
@@ -173,19 +190,25 @@
                     outds          =&InDsLib.._session_
                     ) ;
                     
-    %CAS_Proc_Means(inds           =&InDsLib.._session_,
-                    GroupVars      =&identityVar.,
-                    InDsWhere      =,
-                    Vars           =&ObsCountVar. &NewAggNames.,
-                    AggTypeList    =sum mean min max,
-                    AggVarNames    =&ObsCountVar. 
-                                    &NewAggNames.
-                                    &avglist.
-                                    &minlist.
-                                    &maxlist.,
-                    outds          =&InDsLib.._session_sum_
-                    ) ;                    
-
+    %if %length(&session_var.) %then %do ;                
+      %CAS_Proc_Means(inds           =&InDsLib.._session_,
+                      GroupVars      =&identityVar.,
+                      InDsWhere      =,
+                      Vars           =&ObsCountVar. &NewAggNames.,
+                      AggTypeList    =sum mean min max,
+                      AggVarNames    =&ObsCountVar. 
+                                      &NewAggNames.
+                                      &avglist.
+                                      &minlist.
+                                      &maxlist.,
+                      outds          =&InDsLib.._session_sum_
+                      ) ;                    
+    %end ;
+    %else %do ;
+      proc datasets library=&InDsLib. nolist ;
+        change _session_=_session_sum_ ;
+      quit ;
+    %end ;
   %end ;
   
   %if (&NumGroups. >  0) AND (&inViya. = 0) %then %do ;
@@ -293,9 +316,11 @@
         %let pfix = %scan(&GroupPrefixList.,&i.,%str( )) ;
         %let baselabel = %scan(&NewLabels.,&i.,%str(|)) ;
         &var. = "Total &baselabel." 
-        avg_&var._per_sesn = "Avg &baselabel. per session" 
-        min_&var._per_sesn = "Min &baselabel. per session" 
-        max_&var._per_sesn = "Max &baselabel. per session" 
+        %if %length(&session_var.) %then %do ; 
+          avg_&var._per_sesn = "Avg &baselabel. per session" 
+          min_&var._per_sesn = "Min &baselabel. per session" 
+          max_&var._per_sesn = "Max &baselabel. per session" 
+        %end ;
         %do j = 1 %to &NumGroups. ;
           %let group   = %scan(&Groups.,&j.,%str( )) ;
           &pfix._&group. = "&baselabel. for group=&group." 
