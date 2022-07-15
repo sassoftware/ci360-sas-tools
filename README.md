@@ -1,12 +1,12 @@
 #  SAS Customer Intelligence 360 Analytical SAS Macro Tools
 
 ## Overview
-This repository is a collection of SAS macros designed to exercise Customer Intelligence 360 (CI360) APIs that download data which is in turn used for analysis and insight.  In addition, there are tools for turning the analytical insights into action by enabling users to upload analytical customer scores, segments and personlization data for execution in CI360:
+This repository is a collection of SAS macros designed to exercise Customer Intelligence 360 (CI360) APIs that download data which is in turn used for analysis and insight.  In addition, there are tools for turning the analytical insights into action by enabling users to upload analytical customer scores, segments and personalization data for execution in CI360:
  
 - Leverage proc http and JSON libname to exercise CI360 APIs with SAS code
 - Remove duplicates, extract custom attributes, simplify tables and process identities for CI360 data
-- Create customer level analtyical base tables with features derived from the CI360 Discover and Engage data (e.g. session_details)
-- General utilities such as SAS log scanning tool, running sas macro invacations as parallel process, etc 
+- Create customer level analytical base tables with features derived from the CI360 Discover and Engage data (e.g. session_details)
+- General utilities such as SAS log scanning tool, running sas macro invocations as parallel process, etc 
  
 <details><summary>Click here to see a list of the macros organized by thier purpose: </summary>
 
@@ -24,14 +24,9 @@ This repository is a collection of SAS macros designed to exercise Customer Inte
       - %update_identities()
       
       Create Customer (identity_id) level summaries for ABT:
-      - %make_custom_event_identity_lvl()
-      - %make_document_identity_lvl()
-      - %make_page_identity_lvl()
-      - %make_promotion_identity_lvl()
-      - %make_search_identity_lvl()
+      - %make_disc_detail_identity_lvl()      
       - %make_session_identity_lvl()
-      - %make_url_vars()
-      - %make_visit_identity_lvl()
+      - %make_url_vars()      
 
       CI360 HUB / External Event Related:
       - %batch_load_external_ci360_events()
