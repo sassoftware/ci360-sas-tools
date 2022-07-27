@@ -98,7 +98,7 @@ This topic contains the following sections:
         Client secret: ABC123ci360clientSecretXYZ
        ```
 
-### Using the Macros
+### Using the Macros ->
 
 #### Exposing the Macros to SAS Session
 
