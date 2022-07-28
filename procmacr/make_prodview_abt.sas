@@ -192,8 +192,8 @@
       ;
       by detail_id ;
       if inabt ;
-      if not inpage then abort ; 
-      if seconds_spent_on_page_cnt < 1 then output &outlib..bouncers ;
+      *if not inpage then abort ; 
+      if inpage and (. < seconds_spent_on_page_cnt < 1) then output &outlib..bouncers ;
       
       if active_sec_spent_in_sessn_cnt > 0 then pct_session_active_sec_on_page = active_sec_spent_on_page_cnt / active_sec_spent_in_sessn_cnt ;
         else pct_session_active_sec_on_page = 0 ;
