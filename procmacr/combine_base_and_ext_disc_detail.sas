@@ -35,7 +35,7 @@
 /               combined
 / TimeStampDs   (&inlib..timestamps) The timestamps dataset created by read_udm_data.sas
 /                that contains the list of datasets to read
-/ tables        These are the names, expected in the form of <name> in the above description.  The 
+/ names         These are the names, expected in the form of <name> in the above description.  The 
 /               defalut value is page session
 / sortData (Y/N) flag to sort the data prior to merging.  The default is N
 / CompressOutput (Y/N) The default is Y and this will result in the output SAS datasets
@@ -64,7 +64,7 @@
     %let nm = %upcase(%scan(&names.,&i.,%str( ))) ;
    
     %if "&nm." = "PAGE" %then %do ;
-      %let sortVars&i. = session_id detail_id ;
+      %let sortVars&i. = detail_id ;
       %let extKeepList&i. = active_sec_spent_on_page_cnt seconds_spent_on_page_cnt ;
     %end ;
     %else %if "&nm." = "SESSION" %then %do ;
