@@ -88,8 +88,10 @@
 / raw_data_path           Path where the raw gzipped files will be stored
 / RunFolder               (default=.) This is the folder where the run parallel jobs code, logs are 
 /                         stored
-/ AutoexecFile            THe full filepath and name to the autoexec.sas file to use with run parallel
+/ AutoexecFile            The full filepath and name to the autoexec.sas file to use with run parallel
 /                         jobs macro. 
+/ ConfigFile              (optional) The full filepath and name for the SAS config file to use in 
+/                         the sub sas jobs
 / IncludeFile             This is the full filepath and name for the inlcude file to be sent to 
 /                         run parallel jobs macro.  Typically this holds libnames that all jobs will
 /                         need to have.
@@ -120,6 +122,7 @@
                                   raw_data_path           =,
                                   RunFolder               =.,
                                   AutoexecFile            =,
+                                  ConfigFile              =,
                                   IncludeFile             =,
                                   OutJobSummaryDs         =_jobs_,
                                   OutCheckLogDs           =Check_Log,
@@ -215,6 +218,7 @@
                      JobTimeoutSec      = &JobTimeoutSec.,
                      RunFolder          = &RunFolder.,
                      AutoexecFile       = &AutoexecFile.,
+                     ConfigFile         = &ConfigFile.,
                      OutJobSummaryDs    = &OutJobSummaryDs.,
                      OutCheckLogDs      = &OutCheckLogDs.,
                      ConnectOptions     = &ConnectOptions.) ;
