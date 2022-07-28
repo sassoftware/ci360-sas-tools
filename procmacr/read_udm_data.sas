@@ -27,7 +27,14 @@
 /               to restrict with gz files are read into sas data
 / FilesUncompressed (Y/N) Set to Y if the files have been uncompressed and then the UNCOMPRESSCOMMAND 
 /                   value will be ignored. 
-/ UncompressCommand Default is %str(7z e -so).  If this is explicitly passed as a blank/null
+/ UncompressCommand Default is %str(gzip -dc) but another option is %str(7z e -so). In addition, 
+/                   users can now include &table. and &raw_data_path. as part of the uncompress 
+/                   command and if this is done be sure to enclose the whole parameter in %nrstr().  
+/                   For example, this code avoided arg list too long errors:
+/                   %nrstr(find "&raw_data_path." -name "&table." -print0 | xargs -0 gzip -dc)
+/                   Otherwise, the following gets added to the end of the uncompress command 
+/                   "&raw_data_path.&slash.&table."
+/                   If this parameter is explicitly passed as a blank/null
 /                   value, then the ZIP filename is used to read each zip file separately 
 /                   which takes significantly longer but will work without XCMD enabled
 /============================================================================================*/
@@ -103,8 +110,15 @@
       
     %end ;
     %else %if %length(&UncompressCommand.) %then %do ;
-
-      filename zip&t. PIPE %unquote(%nrbquote('&UncompressCommand. &quote.&raw_data_path.&slash.&table._i&EndfileMatch..gz&quote.'));
+    
+      %let fullTable = %nrbquote(&table._i&EndfileMatch..gz) ;     
+      
+      %if %sysfunc(index(%superq(UncompressCommand),%nrstr(&table.))) > 0 %then %do ;
+        filename zip&t. PIPE %unquote(%nrbquote('%replace(%superq(UncompressCommand),%nrstr(&table.),%nrstr(&fullTable.))'));
+      %end ;
+      %else %do ;
+        filename zip&t. PIPE %unquote(%nrbquote('&UncompressCommand. &quote.&raw_data_path.&slash.&table._i&EndfileMatch..gz&quote.')) ;
+      %end ;
       
       data &outlib..&table. (compress=YES);
         infile zip&t. dlm = '01'x dsd MISSOVER LRECL=60000  ;
