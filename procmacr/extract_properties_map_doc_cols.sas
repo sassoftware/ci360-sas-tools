@@ -14,9 +14,7 @@
 / Usage     : %extract_properties_map_doc_cols(inds            =engage.conversion_milestone,                                  
 /                                              whereStatement  =%str(task_id="b8622642-8da9-4449-bc63-9bc6faa58e98"),
 /                                              NewColNames     =%str(gift amount),
-/                                              NewColLengths   =%str($100. 8.),
-/                                              NewColInformats =%str($100. comma15.),
-/                                              NewColFormats   =%str($100. dollar10.2),
+/                                              NewColLength   =%str($100.),                                              
 /                                              outds           =engage.test) ;
 / Notes     : 
 /============================================================================================
@@ -29,15 +27,10 @@
 /                             properties_map_doc delimited data.  Default is properties_map_doc.
 / WhereStatement              (optional) This is used to subset the input data
 / NewColNames                 Space delimited list of the SAS variables to create from the 
-/                             properties_map_doc column
-/ NewColLengths               This contains a space delimited list of the lenghts/types to use for
+/                             properties_map_doc column.  This list should match the names found
+/                             in the properties_map_col column
+/ NewColLength                This contains a the lenght and type to use for all of
 /                             the new variables created from the properties_map_doc field.
-/ NewColInformats             (optional) If this is provided it needs to be provided for ALL 
-/                             new columns and is an informat that is applied to the text data.
-/                             This is needed for creating numeric columns from formatted text values.
-/ NewColFormats               (optional) If this is provided, it needs to be provided for ALL
-/                             new columns and is expected to be a list of SAS formats to apply to
-/                             the new columns created.
 / outds                       The name of the output SAS dataset to create with the new columns
 / outdsOpts                   (default compress=YES) optional dataset options to apply to the output 
 /                             dataset created.
@@ -46,9 +39,7 @@
                                       properties_map_doc_col_name =properties_map_doc,
                                       whereStatement              =,
                                       NewColNames                 =,
-                                      NewColLengths               =,
-                                      NewColInformats             =,
-                                      NewColFormats               =,
+                                      NewColLength                =,                                      
                                       outds                       =,
                                       outdsOpts                   =%str(compress=YES)) ;
 
@@ -56,41 +47,28 @@
   
   %if NOT %length(&whereStatement.) %then %let whereStatement = 1 ;
   
-  %let NumCols = %words(&NewColLengths.) ;  
+  %let NumCols = %words(&NewColLength.) ;  
   %let cntlB = '02'x ;
   %let cntlC = '03'x ;
   
   data &outds. (&outdsOpts.) ;
     set &inds. (where=(&whereStatement.));
-    
-    length 
-    %do i = 1 %to &NumCols. ;
-      %let name = %scan(&NewColNames.,&i.,%str( )) ;
-      %let len = %scan(&NewColLengths.,&i.,%str( )) ;
-      &name. &len 
-    %end ;
-    ;
-    
-    if length(&properties_map_doc_col_name.) > 0 then do ;
-      %do i = 1 %to &NumCols. ;
-        %let name = %scan(&NewColNames.,&i.,%str( )) ; 
-        %if %length(&NewColInformats.) %then %do ;
-          %let informat = %scan(&NewColInformats.,&i.,%str( )) ; 
-          &name. = input(scan(scan(&properties_map_doc_col_name.,&i.,&cntlC.),2,&cntlB.),&informat.) ;
-        %end ;
-        %else %do ;    
-          &name. = scan(scan(&properties_map_doc_col_name.,&i.,&cntlC.),2,&cntlB.) ;
-        %end ;
-      %end ;
+    array newvars (*) &NewColLength. &newcolnames. ;
+  
+    _iter = 1 ;
+    done = 0 ;
+    do while (not done) ;     
+      pair = scan(&properties_map_doc_col_name.,_iter,&cntlC.) ;
+      if pair <= "" then done = 1 ;
+      else _iter = _iter + 1 ;
+      _name = scan(pair,1,&cntlB.) ;
+      _value = scan(pair,2,&cntlB.) ;
+      do i = 1 to dim(newvars) ;
+        if upcase(vname(newvars(i))) = upcase(_name) then newvars(i) = strip(_value) ;
+      end ;
     end ;
     
-    format
-    %if %length(&NewColFormats.) %then %do i = 1 %to &NumCols. ;
-      %let name = %scan(&NewColNames.,&i.,%str( )) ;  
-      %let format = %scan(&NewColFormats.,&i.,%str( )) ;  
-      &name. &format. 
-    %end ;
-    ;
+    drop _name _value pair _iter done i ;
   run ;
   
 %mend ;
