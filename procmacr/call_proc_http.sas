@@ -40,6 +40,10 @@
 / http_debug_level        Default=0 The debug parameter passed to proc http
 / TimeoutSec              Default=60 The max number of seconds to wait for proc http to respond.
 /                         The value of 0 means it waits forever.
+/ proxy_host              (optional) specifies the Internet host name of an HTTP proxy server.
+/ proxy_port              (optional) specifies an HTTP proxy server port.
+/ proxy_user              (optional) user name to use with proxy server
+/ proxy_pwd               (optional) password to use with proxy server
 /============================================================================================*/
 %macro Call_Proc_HTTP(url                     =,
                       jwt                     =,
@@ -48,11 +52,15 @@
                       Method                  =GET,
                       UserName                =,
                       Password                =,
-                      http_max_retry_attempts =5,
-                      http_retry_wait_sec     =15,
+                      http_max_retry_attempts =3,
+                      http_retry_wait_sec     =5,
                       jsonOutFileNm           =,
                       http_debug_level        =0,
                       TimeoutSec              =60,
+                      proxy_host              =,
+                      proxy_port              =, 
+                      proxy_user              =,
+                      proxy_pwd               =
                       );
 
   %local procHttpAttemptNum done status_code DebugValid ;
@@ -114,6 +122,15 @@
         AUTH_BASIC 
         WEBUSERNAME="%superq(UserName)" 
         WEBPASSWORD="%superq(password)"
+      %end;
+      %if (%length(&proxy_host.) > 0 and %length(&proxy_port.) > 0) %then %do;
+        proxyhost="&proxy_host."
+        proxyport=&proxy_port.      
+        %if %length(&proxy_user.) AND %length(&proxy_pwd.) %then
+        %do;
+          PROXYUSERNAME="&proxy_user."
+          PROXYPASSWORD="&proxy_pwd."
+        %end;
       %end;
       method="%upcase(&method.)" 
       url="%superq(url)" CLEAR_CACHE ;
