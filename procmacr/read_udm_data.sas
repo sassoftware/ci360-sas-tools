@@ -100,7 +100,7 @@
 
     %if ("&FilesUncompressed." = "Y") %then %do ;
     
-     filename text&t. %unquote(%nrbquote('&quote.&raw_data_path.&slash.&table._i&EndfileMatch.&quote.'));
+     filename text&t. %unquote(%nrbquote('&quote.&raw_data_path.&slash.&table.&EndfileMatch.&quote.'));
       
       data &outlib..&table. (compress=YES);
         infile text&t. dlm = '01'x dsd MISSOVER LRECL=60000  ;
@@ -111,13 +111,13 @@
     %end ;
     %else %if %length(&UncompressCommand.) %then %do ;
     
-      %let fullTable = %nrbquote(&table._i&EndfileMatch..gz) ;     
+      %let fullTable = %nrbquote(&table.&EndfileMatch..gz) ;     
       
       %if %sysfunc(index(%superq(UncompressCommand),%nrstr(&table.))) > 0 %then %do ;
         filename zip&t. PIPE %unquote(%nrbquote('%replace(%superq(UncompressCommand),%nrstr(&table.),%nrstr(&fullTable.))'));
       %end ;
       %else %do ;
-        filename zip&t. PIPE %unquote(%nrbquote('&UncompressCommand. &quote.&raw_data_path.&slash.&table._i&EndfileMatch..gz&quote.')) ;
+        filename zip&t. PIPE %unquote(%nrbquote('&UncompressCommand. &quote.&raw_data_path.&slash.&table.&EndfileMatch..gz&quote.')) ;
       %end ;
       
       data &outlib..&table. (compress=YES);
