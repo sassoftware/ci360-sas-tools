@@ -38,9 +38,12 @@ libname out_run "&outFolder./run_jobs" ;
          out_macrovar_name = DSC_AUTH_TOKEN) ;
          
 %Throttle_UDM_Data_Download(JWT                     =%superq(DSC_AUTH_TOKEN),
-                            mart_name               =detail,                             
-                            ExtGatewayAddress       =%str(https://extapigwservice-prod.ci360.sas.com/marketingGateway),
-                            testModeParms           =%nrstr(&schemaVersion=7&category=DISCOVER&includeAllHourStatus=true),                            
+                            mart_name               =detail,     
+                            agent_name              =%str(DiscoverAgent),
+                            ExtGatewayAddress       =%str(extapigwservice-prod.ci360.sas.com),
+                            schemaVersion           =9,
+                            category                =DISCOVER,
+                            addlAPIParms            =%nrstr(&includeAllHourStatus=true),                            
                             limit                   =10,
                             dataRangeStartTime      ='14MAR2021 00:00:00'dt,
                             dataRangeEndTime        ='12MAY2021 00:00:00'dt,

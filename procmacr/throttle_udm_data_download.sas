@@ -39,13 +39,22 @@
 / -------------------------------------------------------------------------------------
 / JWT                     Java Web Token based on the tenant id and secret key.  
 /                         The %Gen_JWT() macro can create this for you.
-/ mart_name               This is expected to be one of two time based mart values:
-/                         DBTREPORT or DETAIL.  The code will force the correct
+/ mart_name               This is expected to be one of three time based mart values:
+/                         DBTREPORT, DETAIL or CDM.  The code will force the correct
 /                         case for the API
+/ agent_name              The default value is %str(DiscoverAgent).  This comes from CI360 UI
+/                         under General Settings | External Access | Access Points.
 / ExtGatewayAddress       The external gateway address for the tenant.  This can be found in the 
 /                         CI360 UI at General | External | Access. 
+/ proxy_host              (optional) specifies the Internet host name of an HTTP proxy server.
+/ proxy_port              (optional) specifies an HTTP proxy server port.
+/ proxy_user              (optional) user name to use with proxy server
+/ proxy_pwd               (optional) password to use with proxy server
+/ schemaVersion           schema version to download
+/ category                category of data to download, separate multiple values with comma and 
+/                         enclose in %str()
 / limit                   API parameter default value of 20. 
-/ testModeParms           List exactly as they should show up on the URL as paramters.  See above
+/ addlAPIParms            List exactly as they should show up on the URL as paramters.  See above
 /                         in notes for how to use this macro parameter
 / dataRangeStartTime      Use SAS datetime literal value such as '15DEC2019 00:00:00'dt 
 / dataRangeEndTime        Use SAS datetime literal value such as '14FEB2020 00:00:00'dt
@@ -105,10 +114,17 @@
 /                         will be saved.
 /============================================================================================*/
 %macro Throttle_UDM_Data_Download(JWT                     =,
-                                  mart_name               =,                                  
-                                  ExtGatewayAddress       =,                                  
+                                  mart_name               =,    
+                                  agent_name              =,
+                                  ExtGatewayAddress       =,
+                                  proxy_host              =,
+                                  proxy_port              =,
+                                  proxy_user              =,
+                                  proxy_pwd               =,
+                                  SchemaVersion           =9,
+                                  Category                =DISCOVER,    
                                   limit                   =,
-                                  testModeParms           =%nrstr(&schemaVersion=7&category=DISCOVER&includeAllHourStatus=true),
+                                  addlAPIParms            =%nrstr(&includeAllHourStatus=true),
                                   dataRangeStartTime      =,
                                   dataRangeEndTime        =,
                                   Tables                  =,
@@ -142,7 +158,7 @@
 
   %if not %length(&StartJob.) %then %let StartJob = 1 ;
 
-  %if "%upcase(&Mart_Name.)" = "IDENTITY" %then %do ;
+  %if "%upcase(&Mart_Name.)" = "IDENTITY" OR "%upcase(&Mart_Name.)" = "SNAPSHOT" %then %do ;
     %put E%upcase(rror): Use the DOWNLOAD_UDM_DATA macro for the idenity data ;
     %goto FINISH ;
   %end ;
@@ -155,21 +171,27 @@
 
   data DownloadMacroParms ;
     length dataRangeStartTimeStamp dataRangeEndTimeStamp $30. ;
-    length jwt $1000. mart_name $32. Tables $2000. ExtGatewayAddress $1000. raw_data_path $2000. 
-           limit 8. testModeParms $500. RenameExistingGZ $1. outlib $32. 
-           OutIterFilePath $2000.;
-    retain jwt mart_name Tables ExtGatewayAddress raw_data_path 
-           limit testModeParms RenameExistingGZ outlib 
-           OutIterFilePath ;
+    length jwt $1000. mart_name $32. agent_name $150. SchemaVersion 8. proxy_host $100. proxy_port $20. 
+           proxy_user $150. proxy_pwd $150. Category $50. 
+           Tables $2000. ExtGatewayAddress $1000. raw_data_path $2000. 
+           limit 8. addlAPIParms $500. outlib $32. OutIterFilePath $2000.;
+    retain jwt mart_name agent_name SchemaVersion proxy_host proxy_port proxy_user proxy_pwd Category 
+           Tables ExtGatewayAddress raw_data_path limit addlAPIParms outlib OutIterFilePath ;
  
     JWT                     = '%nrstr(' || "&JWT." || ')' ;
     mart_name               = "&mart_name." ;
+    agent_name              = "&agent_name." ;
+    SchemaVersion           = &SchemaVersion. ;
+    proxy_host              = "&proxy_host." ;
+    proxy_port              = "&proxy_port." ;
+    proxy_user              = "&proxy_user." ;
+    proxy_pwd               = "&proxy_pwd." ;
+    Category                = '%str(' || "&Category." || ')' ;     
     Tables                  = "&Tables." ;
     ExtGatewayAddress       = "&ExtGatewayAddress." ;
     raw_data_path           = "&raw_data_path." ;
     limit                   = &limit. ;  
-    testModeParms           = '%nrstr(' || "&testModeParms." || ')' ;
-    RenameExistingGZ        = "N" ;
+    addlAPIParms            = '%nrstr(' || "&addlAPIParms." || ')' ;
     outlib                  = "&outlib." ;
     OutIterFilePath         = "&OutIterFilePath." ;
   
@@ -189,7 +211,6 @@
       end_time = put(timepart(end),tod10.) ;
       dataRangeEndTimeStamp = strip(end_date) || "T" || strip(end_time) || ".000Z" ;
       if Numdays > 0 then do ;
-        FileTag           = "_&dt_str._iter" || strip(put(iteration,z4.)) ;
         OutFiles2ReadNm   = "files2read" || strip(put(iteration,z4.)) ;
         OutTimeStampsNm   = "timestamps" || strip(put(iteration,z4.)) ;
         OutSchemaNm       = "schema" || strip(put(iteration,z4.)) ;          
