@@ -4,6 +4,8 @@
 Use Case1: You have downloaded some time range of CI360 data and you later want to add more time periods 
 Use Case2: You downloaded some tables and want to add some additional tables from a later second download
 
+
+
 In either case, you want to combine the two separate folders of data into a single combined folder
 */
 
