@@ -92,8 +92,8 @@
         put @8 column_name 'LENGTH=8.' ;
       else if data_type = "map" then 
         put @8 column_name 'FORMAT=$4000.' ;
-      else if data_type = "" and column_type = "array<string>" then 
-        put @8 column_name 'FORMAT=$32000.' ;
+      else if data_type = "" and column_type in ("array<string>" "string") then 
+        put @8 column_name 'FORMAT=$4000.' ;
       else abort ;
       if lastrec then put @6 ';' ;
     run ;
