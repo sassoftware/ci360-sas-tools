@@ -425,6 +425,11 @@
           proc copy MOVE in=&inlib. out=&duplib. memtype=data ;
             select table&t._dups ; 
           run ;
+          
+          proc datasets library=&duplib. nolist ;
+            change table&t._dups=%scan(&SourceNameList.,&t.,%str(|));
+          quit ;
+          
         %end ;
       %end ;
       %else %do ;
