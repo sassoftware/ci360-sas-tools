@@ -427,7 +427,7 @@
           run ;
           
           proc datasets library=&duplib. nolist ;
-            change table&t._dups=%scan(&SourceNameList.,&t.,%str(|));
+            change table&t._dups=&table.;
           quit ;
           
         %end ;
