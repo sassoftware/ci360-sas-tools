@@ -292,8 +292,8 @@
         %end ;
         
         data &MergeBaseLib..&ds. (&dsopt.) ;
-          merge &MergeBaseLib..&ds. (in=inbase)
-                &MergeAddLib..&ds.  (in=inadd)
+          set &MergeBaseLib..&ds. (in=inbase)
+              &MergeAddLib..&ds.  (in=inadd)
           ;
           by &byVars. ;
           if not (first.&lastByVar. and last.&lastByVar.) then abort ;
