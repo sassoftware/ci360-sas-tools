@@ -160,8 +160,8 @@
     %if %nobs(&outlib..&table.) = 0 %then %do ;
       proc datasets library=&outlib. nolist ;
         delete &table. ;
-      quit ;
-      
+      quit ;    
+                    
       %if %length(&TimeStampsDs.) %then %do ;
         data &TimeStampsDs. ;
           set &TimeStampsDs. ;
