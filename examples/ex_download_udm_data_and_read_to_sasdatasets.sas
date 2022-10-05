@@ -33,21 +33,15 @@ libname out "&outFolder." ;
          secret_key        = %str(<insert secret_key>),
          method            = datastep,
          out_macrovar_name = DSC_AUTH_TOKEN) ;
-         
+
+** Note that no timeperiod parameters are passed when downloading from the snapshot mart **;         
 %Download_UDM_Data(JWT                     =%superq(DSC_AUTH_TOKEN),
-                   mart_name               =detail,
-                   Tables                  =,
+                   mart_name               =snapshot,                   
                    ExtGatewayAddress       =%str(extapigwservice-prod.ci360.sas.com),     
                    schemaVersion           =9,
-                   category                =DISCOVER,
+                   category                =ENGAGEMETADATA,
                    addlAPIParms            =%nrstr(&includeAllHourStatus=true),
-                   raw_data_path           =%str(&gzfileFolder.),                   
-                   limit                   =10,
-                   dataRangeStartTimeStamp =2022-04-30T00:00:00.000Z,
-                   dataRangeEndTimeStamp   =2022-06-27T00:00:00.000Z,                   
-                   OutFiles2ReadNm         =Files2Read,
-                   OutTimeStampsNm         =TimeStamps,
-                   OutSchemaNm             =Schema,
+                   raw_data_path           =%str(&gzfileFolder.),                                                                  
                    OutIterFilePath         =%str(&outFolder./iteration_files),
                    outlib                  =out) ;
 
@@ -68,9 +62,12 @@ run ;
 ** Read the *.gz files in raw_data_path into SAS datasets in Outlib **;
 %Read_UDM_Data(Files2ReadDs      =out.Files2Read,
                SchemaDs          =out.Schema,
+               TimeStampsDs      =out.timestamps,
                FilesUncompressed =N,
                raw_data_path     =%str(&gzfileFolder.),
-               UncompressCommand =%str(gzip -cd),
+               /** For snapshot data make sure endfilematch is empty rather than * or different tables will be read in together **/
+               EndfileMatch      =%str(),
+               UncompressCommand =%nrstr(find "&raw_data_path." -name "&table." -print0 | xargs -0 gzip -dc),
                outlib            =out) ;
 
 %StopWatch(stop,Banner=**** Done Read data ***) ;
