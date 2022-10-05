@@ -78,9 +78,11 @@ run ;
 ** Read the *.gz files in raw_data_path into SAS datasets in Outlib **;
 %Read_UDM_Data(Files2ReadDs      =out.Files2Read,
                SchemaDs          =out.Schema,
+               TimeStampsDs      =out.timestamps,
                FilesUncompressed =N,
                raw_data_path     =%str(&gzfileFolder.),
-               UncompressCommand =%str(gzip -cd),
+               UncompressCommand =%nrstr(find "&raw_data_path." -name "&table." -print0 | xargs -0 gzip -dc),
+               EndfileMatch      =%str(*),
                outlib            =out) ;
 
 %StopWatch(stop,Banner=**** Done Read data ***) ;
