@@ -133,6 +133,29 @@
   
   %if NOT %length(&OutIterFilePath.) %then 
     %let OutIterFilePath = %sysfunc(pathname(&outlib.)) ;
+    
+  %if %length(&AddlAPIParms.) %then %do ;
+    %if %sysfunc(index(%upcase(&AddlAPIParms.),&SCHEMAVERSION)) > 0 %then %do ;
+      %put %cmpres(E%upcase(rror): SchemaVersion parameter is now passed as a separate macro parameter 
+        - so DONT include it in the AddlAPIParms (&AddlAPIParms.)) ;
+      %goto FINISH ;
+    %end ;
+    %else %if %sysfunc(index(%upcase(&AddlAPIParms.),&CATEGORY)) > 0 %then %do ;
+      %put %cmpres(E%upcase(rror): Category parameter is now passed as a separate macro parameter 
+        - so DONT include it in the AddlAPIParms (&AddlAPIParms.)) ;
+      %goto FINISH ;
+    %end ;
+  %end ;
+    
+  %if not %length(&ExtGatewayAddress.) %then %do ;
+    %put E%upcase(rror): ExtGatewayAddress (&ExtGatewayAddress.) must be non-missing ;
+    %goto FINISH ;
+  %end ;
+  %else %if %sysfunc(index(&ExtGatewayAddress.,/)) > 0 %then %do ;
+    %put %cmpres(E%upcase(rror): ExtGatewayAddress (&ExtGatewayAddress.) is now expected to be exactly the value of External 
+        Gateway Host from your tenant and should NOT be preceeded by http:\\ NOR have the /MarketingGateway string afterwards) ;
+    %goto FINISH ;
+  %end ;
 
   %let download_url_base = %str(https://&ExtGatewayAddress./marketingGateway/discoverService/dataDownload/eventData/) ;
   %let PathLen = %sysevalf(%length(&OutIterFilePath.) + 255) ;
