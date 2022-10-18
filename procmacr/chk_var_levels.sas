@@ -127,7 +127,7 @@
     %if %eval(&cntNumVars.) > 0 %then %do ; 
       array nums (&cntNumVars.) &numvarlist. ;
       array num2chk (&cntNumVars.) _TEMPORARY_ ;
-      retain num2chk
+      retain num2chk ;
       lastnumdiff = . ;
     %end ;
     
