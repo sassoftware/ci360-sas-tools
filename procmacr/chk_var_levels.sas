@@ -96,53 +96,71 @@
     proc sort data=&inds. ; by &SortVars. ; run ;
   %end ;
   
-  data numvar2check ;
-    length varName $32. ;
-    %do i = 1 %to &cntNumVars. ;
-      %let var = %scan(&numvarlist.,&i.,%str( )) ;
-      varname = "&var." ;
-      output ;
-    %end ;
-  run ;
+  %if %eval(&cntNumVars.) > 0 %then %do ;
+    data numvar2check ;
+      length varName $32. ;
+      %do i = 1 %to &cntNumVars. ;
+        %let var = %scan(&numvarlist.,&i.,%str( )) ;
+        varname = "&var." ;
+        output ;
+      %end ;
+    run ;
+  %end ;
   
-  data charvar2check ;
-    length varName $32. ;
-    %do i = 1 %to &cntCharVars. ;
-      %let var = %scan(&charvarlist.,&i.,%str( )) ;
-      varname = "&var." ;
-      output ;
-    %end ;
-  run ;
- 
+  %if %eval(&cntCharVars.) > 0 %then %do ;
+    data charvar2check ;
+      length varName $32. ;
+      %do i = 1 %to &cntCharVars. ;
+        %let var = %scan(&charvarlist.,&i.,%str( )) ;
+        varname = "&var." ;
+        output ;
+      %end ;
+    run ;
+  %end ;
+  
   data &outdsLib.._diffs_ (keep=&SortVars. &IgnoreVars. &ChkIfRepeatedVars. lastnumdiff lastchardiff);
     set &inds. ;
     by &SortVars. ;
     
-    array nums (&cntNumVars.) &numvarlist. ;
-    array chars (&cntCharVars.) $&maxcharlen. &charvarlist. ;
+    length lastnumdiff lastchardiff n c 8. ;
     
-    array num2chk (&cntNumVars.) _TEMPORARY_ ;
-    array char2chk (&cntCharVars.) $&maxcharlen. _TEMPORARY_ ;
+    %if %eval(&cntNumVars.) > 0 %then %do ; 
+      array nums (&cntNumVars.) &numvarlist. ;
+      array num2chk (&cntNumVars.) _TEMPORARY_ ;
+      retain num2chk
+      lastnumdiff = . ;
+    %end ;
     
-    retain num2chk char2chk ;
-    lastnumdiff = . ;
-    lastchardiff = . ;
+    %if %eval(&cntCharVars.) > 0 %then %do ; 
+      array chars (&cntCharVars.) $&maxcharlen. &charvarlist. ;
+      array char2chk (&cntCharVars.) $&maxcharlen. _TEMPORARY_ ;         
+      retain char2chk ;    
+      lastchardiff = . ;
+    %end ;
     
     if first.&lastSortVar. then do ;
-      do n = 1 to dim(num2chk) ;
-        num2chk(n) = nums(n) ;
-      end ;
-      do c = 1 to dim(char2chk) ;
-        char2chk(c) = chars(c) ;
-      end ;
+      %if %eval(&cntNumVars.) > 0 %then %do ; 
+        do n = 1 to dim(num2chk) ;
+          num2chk(n) = nums(n) ;
+        end ;
+      %end ;
+      %if %eval(&cntCharVars.) > 0 %then %do ; 
+        do c = 1 to dim(char2chk) ;
+          char2chk(c) = chars(c) ;
+        end ;
+      %end ;
     end ;
     else do ;
-      do n = 1 to dim(num2chk) ;
-        if abs(num2chk(n) - nums(n)) > &NumDiffTol. then lastnumdiff = n ;
-      end ;
-      do c = 1 to dim(char2chk) ;
-        if char2chk(c) NE chars(c) then lastchardiff = c ;
-      end ;
+      %if %eval(&cntNumVars.) > 0 %then %do ; 
+        do n = 1 to dim(num2chk) ;
+          if abs(num2chk(n) - nums(n)) > &NumDiffTol. then lastnumdiff = n ;
+        end ;
+      %end ;
+      %if %eval(&cntCharVars.) > 0 %then %do ; 
+        do c = 1 to dim(char2chk) ;
+          if char2chk(c) NE chars(c) then lastchardiff = c ;
+        end ;
+      %end ;
     end ;
     
     if (lastnumdiff or lastchardiff) then output ;
