@@ -143,7 +143,7 @@
         by Errlevel ;
         id Errlevel ErrlevelDesc ;
         var lineNum logline ;
-        format logline $80. ;
+        format logline $150. ;
       run ;
       title ;
       title2 ;
