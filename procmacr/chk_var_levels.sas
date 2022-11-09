@@ -118,24 +118,22 @@
     run ;
   %end ;
   
-  data &outdsLib.._diffs_ (keep=&SortVars. &IgnoreVars. &ChkIfRepeatedVars. lastnumdiff lastchardiff);
+  data &outdsLib.._diffs_ ;
     set &inds. ;
     by &SortVars. ;
-    
-    length lastnumdiff lastchardiff n c 8. ;
-    
+        
     %if %eval(&cntNumVars.) > 0 %then %do ; 
+      length lastnumdiff n 8. ;
       array nums (&cntNumVars.) &numvarlist. ;
       array num2chk (&cntNumVars.) _TEMPORARY_ ;
-      retain num2chk ;
-      lastnumdiff = . ;
+      retain num2chk ;      
     %end ;
     
     %if %eval(&cntCharVars.) > 0 %then %do ; 
+      length lastchardiff c 8. ;
       array chars (&cntCharVars.) $&maxcharlen. &charvarlist. ;
       array char2chk (&cntCharVars.) $&maxcharlen. _TEMPORARY_ ;         
       retain char2chk ;    
-      lastchardiff = . ;
     %end ;
     
     if first.&lastSortVar. then do ;
@@ -163,8 +161,19 @@
       %end ;
     end ;
     
-    if (lastnumdiff or lastchardiff) then output ;
-    drop n c ;
+    keep &SortVars. &IgnoreVars. &ChkIfRepeatedVars. ;
+    %if %eval(&cntNumVars.) > 0 AND %eval(&cntCharVars.) > 0 %then %do ;
+      if (lastnumdiff or lastchardiff) then output ; 
+      keep lastnumdiff lastchardiff ;
+    %end ;
+    %else %if %eval(&cntNumVars.) > 0 %then %do ;
+      if (lastnumdiff) then output ;    
+      keep lastnumdiff ;
+    %end ;
+    %else %if %eval(&cntCharVars.) > 0 %then %do ;
+      if (lastChardiff) then output ;    
+      keep lastchardiff ;
+    %end ;    
   run ;
   
   proc sort NODUPKEY data=&outdsLib.._diffs_ out=&outdsLib.._diffs_uniq_vals ; by  &SortVars. ; run ;
