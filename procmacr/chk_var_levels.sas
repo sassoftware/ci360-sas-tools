@@ -151,7 +151,7 @@
     else do ;
       %if %eval(&cntNumVars.) > 0 %then %do ; 
         do n = 1 to dim(num2chk) ;
-          if abs(num2chk(n) - nums(n)) > &NumDiffTol. then lastnumdiff = n ;
+          if abs(sum(0,num2chk(n)) - sum(0,nums(n))) > &NumDiffTol. then lastnumdiff = n ;
         end ;
       %end ;
       %if %eval(&cntCharVars.) > 0 %then %do ; 
