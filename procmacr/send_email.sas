@@ -16,7 +16,7 @@
 / Name               Description
 / -------------------------------------------------------------------------------------
 / fromAddress    The email address to display as the sender of the email
-/ toAddress      The email address to send the email to
+/ toAddress      The email address to send the email to or a space delimited list of addresses
 / subject        The subject of the email
 / emailHost      (optional) If specified this is used to set the EMAILHOST SAS option
 / emailPort      (optional) If specified this is used to set the EMAILPORT SAS option
@@ -43,7 +43,7 @@
   %end ;
                                   
   filename _mail_ email from="&fromAddress."
-                        to="&toAddress."
+                        to=(%quotelst(&toAddress.))
                         ct="text/html"
                         subject="&subject." ;
  
