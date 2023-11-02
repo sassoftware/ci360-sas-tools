@@ -12,7 +12,7 @@
 /             proc http if it fails.  Also this code automatically checks output 
 /             header for any errs 
 / FuncOutput: N/A
-/ Usage     :
+/ Usage     : add some text
 / Notes     : Removed CT option as this has been depreciated according to hte SAS documentation:
 /             Beginning with SAS 9.4M3, this option is supported for compatibility with previous 
 /             versions of SAS software. Use the HEADERS Statement instead of CT= .  Also,

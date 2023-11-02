@@ -12,7 +12,7 @@
 /             This macro can be run against the SAS log window in interactive sas or 
 /             against a saved ASCII text file.
 / FuncOutput: N/A
-/ Usage     :
+/ Usage     : need to update this
 / Notes     : - Need to make sure that all relevant issues are getting trapped for
 /             - Do we need additional levels of error categories?
 /             - Could enable the user to specify the errors/issues that should be flagged
