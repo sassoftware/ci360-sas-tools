@@ -100,7 +100,7 @@
       maint = input(substr(sysvlong, pos3+1, pos4-pos3-1),8.);   /* maintenance level */
     end ;
     if NOT viya AND (major < 9 or minor < 4 or maint < 5) then call symputx("DebugValid",0) ;
-      else if major < 3 or minor < 2 then call symputx("DebugValid",0) ;
+      else if viya AND (major < 3 or minor < 3) then call symputx("DebugValid",0) ;
 
     drop pos1-pos4 ;
   run ;
