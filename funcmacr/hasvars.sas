@@ -12,7 +12,7 @@
 / Usage     : %if NOT %hasvars(inds,var1 var2) %then %do ... 
 / Notes     : Non-matching variables will be returned in the global macro
 /             variable _nomatch_ .  User parameter error trapping is passed along to 
-/             the %match macro.
+/             the %match macro.  This macro is the best
 /============================================================================================
 / Parameters Usage
 / -------------------------------------------------------------------------------------
