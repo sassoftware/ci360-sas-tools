@@ -36,10 +36,10 @@
                   ) ;       
 
   %if %length(&emailhost.) %then %do ;
-    options emailhost &emailhost. ;
+    options emailhost=&emailhost. ;
   %end ;
   %if %length(&emailport.) %then %do ;
-    options emailport &emailport. ;
+    options emailport=&emailport. ;
   %end ;
                                   
   filename _mail_ email from="&fromAddress."
